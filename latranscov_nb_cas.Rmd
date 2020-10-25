@@ -1,0 +1,90 @@
+---
+title: "LAPTRANSCOV -- nombre de sujets"
+author: "Philippe MICHEL"
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: caiman
+    highlight: github
+    toc: yes
+  tufte::tufte_html: default
+  word_document:
+    toc: yes
+  html_document:
+    self_contained: true
+    df_print: paged
+    toc: yes
+    toc_float: 
+       collapsed: false
+    theme: lumen
+  html_notebook:
+    fig_caption: yes
+    theme: spacelab
+  pdf_document:
+    includes:
+      in_header: tete.tex
+    keep_tex: yes
+    latex_engine: lualatex
+    toc: yes
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include= FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+# knitr::opts_chunk$set(echo = TRUE, warning = TRUE, message = TRUE)
+```
+
+
+
+```{r info}
+rm(list=ls())
+library("missMDA")
+library("epiDisplay")
+library("factoextra")
+library("lubridate")
+library("knitr")
+library("stringr")
+library("tidyverse")
+library("kableExtra")
+# sessionInfo()
+```
+
+# Bases du calcul
+
+Dans une étude observationnelle il n'y a pas un test satistique central (comme une comapraison de survie entre deux traitement par ex.) sur lequel s'appuyer pour calculer un nombre de patients nécessaires. Néanmoins, au prix de quelques hypothèse, on peut avoir une idée d'un effectif permettant d'avoir des résultats fiables.
+
+Il faut donc avoir deux chiffres :
+
+- Le pourcentage de cas positifs ou une estimation
+- la marge d'erreur sur les résultats qu'on considère comme acceptable.
+
+## Pourcentage de cas positifs
+
+Il n'y a à ce jour aucune donnée sur le sujet. Les études sur d'autres virus donnent des résultats très différents : de 40 % (papillomavirus, Sood 1994) à 90 % (HSV, Kwak 2016). On sait par ailelur que le COVID-19 est retrouvé dans les selles pour 29 % des patients (Wang 2020). 
+
+Devant ces approximations discutables & non concluantes, le calcul sera fait pour diverses hypothèses.
+
+## Marge d'erreur
+
+Pour une étude observationnelle simple une marge d'erreur de 20 % est acceptable. 
+
+# Résultats 
+
+Le tableau suivant donne le nombre de sujets nécessaires pour plusieurs hypothèses sur le pourcentage de cas positifs (ou négatifs) avec un intervalle de confiance de 95 %, sujets pris dans une grande population.
+
+```{r}
+pp <- 0.5
+z <- 1.96
+e <- 0.2
+pourc <- c(0.5,.6,.7,.8,.9)
+dd <- z^2*(pourc*(1-pourc))
+nn <- round((dd/e^2)/(1+(dd/(e^2*100000))),0)+1
+zz <- data.frame(pourc,nn)
+kable(zz, col.names = c("% cas positifs prévus","nombre de cas"), caption ="Nombre de cas nécessaires selon le % de cas positifs prévus") %>% 
+    kable_styling(bootstrap_options = "striped" ,"hover", full_width = F)
+```
+
+# Conclusion
+
+Un échantillon de 25 sujets sembe correct en sachant qu'on ne peut faire alors aucun test (pour chercher une corrélation entre la présence du virus & un caractère clinique par ex.) & surtout pas les tests multiples qui sont souvent pratiqués dans ce type d'étude. À titre d'exemple, si on voulait comparer deux groupes avec des pourcentages respectivement de 50% & 70% avec des risques usuels, il faudrait 103 sujets par groupe.
